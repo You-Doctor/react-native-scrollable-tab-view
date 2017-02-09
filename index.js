@@ -12,20 +12,14 @@ const {
   StyleSheet,
   InteractionManager,
   Platform,
+  Text,
 } = ReactNative;
 const TimerMixin = require('react-timer-mixin');
 
 const SceneComponent = require('./SceneComponent');
-const DefaultTabBar = require('./DefaultTabBar');
-const ScrollableTabBar = require('./ScrollableTabBar');
-
 
 const ScrollableTabView = React.createClass({
   mixins: [TimerMixin, ],
-  statics: {
-    DefaultTabBar,
-    ScrollableTabBar,
-  },
 
   propTypes: {
     tabBarPosition: PropTypes.oneOf(['top', 'bottom', 'overlayTop', 'overlayBottom', ]),
@@ -100,13 +94,10 @@ const ScrollableTabView = React.createClass({
   },
 
   renderTabBar(props) {
-    if (this.props.renderTabBar === false) {
-      return null;
-    } else if (this.props.renderTabBar) {
+    if (this.props.renderTabBar) {
       return React.cloneElement(this.props.renderTabBar(props), props);
-    } else {
-      return <DefaultTabBar {...props} />;
     }
+    return null;
   },
 
   updateSceneKeys({ page, children = this.props.children, callback = () => {}, }) {
@@ -142,29 +133,33 @@ const ScrollableTabView = React.createClass({
 
   renderScrollableContent() {
     const scenes = this._composeScenes();
-    return <ScrollView
-      horizontal
-      pagingEnabled
-      automaticallyAdjustContentInsets={false}
-      contentOffset={{ x: this.props.initialPage * this.state.containerWidth, }}
-      ref={(scrollView) => { this.scrollView = scrollView; }}
-      onScroll={(e) => {
-        const offsetX = e.nativeEvent.contentOffset.x;
-        this._updateScrollValue(offsetX / this.state.containerWidth);
-      }}
-      onMomentumScrollBegin={this._onMomentumScrollBeginAndEnd}
-      onMomentumScrollEnd={this._onMomentumScrollBeginAndEnd}
-      scrollEventThrottle={16}
-      scrollsToTop={false}
-      showsHorizontalScrollIndicator={false}
-      scrollEnabled={!this.props.locked}
-      directionalLockEnabled
-      alwaysBounceVertical={false}
-      keyboardDismissMode="on-drag"
-      {...this.props.contentProps}
-      >
-      {scenes}
-    </ScrollView>;
+    return (
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          automaticallyAdjustContentInsets={false}
+          contentOffset={{ x: this.props.initialPage * this.state.containerWidth, }}
+          ref={(scrollView) => { this.scrollView = scrollView; }}
+          onScroll={(e) => {
+            const offsetX = e.nativeEvent.contentOffset.x;
+            this._updateScrollValue(offsetX / this.state.containerWidth);
+          }}
+          onMomentumScrollBegin={this._onMomentumScrollBeginAndEnd}
+          onMomentumScrollEnd={this._onMomentumScrollBeginAndEnd}
+          scrollEventThrottle={16}
+          scrollsToTop={false}
+          showsHorizontalScrollIndicator={false}
+          scrollEnabled={!this.props.locked}
+          directionalLockEnabled
+          alwaysBounceVertical={false}
+          keyboardDismissMode="on-drag"
+          {...this.props.contentProps}
+        >
+          {scenes}
+        </ScrollView>
+        {this.props.renderBanner && this.props.renderBanner()}
+      </View>);
   },
 
   _composeScenes() {
@@ -267,6 +262,7 @@ const ScrollableTabView = React.createClass({
       {this.props.tabBarPosition === 'top' && this.renderTabBar(tabBarProps)}
       {this.renderScrollableContent()}
       {(this.props.tabBarPosition === 'bottom' || overlayTabs) && this.renderTabBar(tabBarProps)}
+      {this.props.renderDialog && this.props.renderDialog()}
     </View>;
   },
 });
