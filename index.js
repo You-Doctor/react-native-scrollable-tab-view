@@ -263,6 +263,7 @@ const ScrollableTabView = React.createClass({
       {this.renderScrollableContent()}
       {(this.props.tabBarPosition === 'bottom' || overlayTabs) && this.renderTabBar(tabBarProps)}
       {this.props.renderDialog && this.props.renderDialog()}
+      {this.props.renderWaitingIndicator && this.props.renderWaitingIndicator()}
     </View>;
   },
 });
